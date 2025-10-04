@@ -1,0 +1,43 @@
+@default:
+  just -l
+
+folder := "BlueArchive"
+output := folder + "/cursors"
+
+export INDEX_THEME := '''
+[Icon Theme]
+Name=BlueArchive
+Inherits=Adwaita
+'''
+init:
+  mkdir -p {{output}}
+  printf "%s" "$INDEX_THEME" > {{folder}}/index.theme
+
+clean:
+  rm -rf {{folder}}
+convert: clean init
+    win2xcur -s \
+    -O 128 \
+    -r 0.20 -S 0.10 \
+    -x 0.08 -y 0.08 \
+    -c "#000000" \
+    -o {{output}} \
+    *.cur && \
+    win2xcur \
+    -o {{output}} \
+    *.ani 
+link:
+  cd {{output}} && ../../utils/links.sh
+linkclean:
+  cd {{output}} && fd -tl -x rm
+
+build:convert link
+
+install: && fresh
+  rm -rf ~/.icons/BlueArchive && \
+    cp -r BlueArchive ~/.icons/BlueArchive
+
+restorecursor:
+  hyprctl setcursor Bibata-Modern-Ice 24 && sleep 2
+fresh:restorecursor
+  hyprctl setcursor BlueArchive 32
